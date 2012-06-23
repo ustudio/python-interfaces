@@ -86,6 +86,16 @@ class TestInterfaces(TestCase):
         inclusifier = Inclusifier()
         self.assertEqual("5, ladies and gentlemen.", inclusifier.execute(5))
 
+    def test_implement_not_interface(self):
+        """Test implementing a not defined interface."""
+        class BadInterface(object):
+            pass
+
+        with self.assertRaises(interfaces.InvalidInterface):
+            @interfaces.implement(BadInterface)
+            class Foo(object):
+                pass
+
     def test_multiple_interfaces(self):
         """Test that we can use multiple interfaces."""
 

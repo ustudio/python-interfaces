@@ -10,10 +10,10 @@ A simple example:
 
         @interfaces.require
         def execute(self):
-            '''All SimpleInterfaces must implement an 'execute' method.'''
+            '''All BehaviorInterfaces must implement an 'execute' method.'''
             pass
 
-    @interfaces.implement(SimpleInterface)
+    @interfaces.implement(BehaviorInterface)
     class NewBehavior(object):
 
         @interfaces.final
@@ -29,11 +29,11 @@ FINAL_ATTR = "_interfaces_final"
 
 def define(cls):
     """Class decorator that defines an interface class."""
-    cls._interfaces_required = []
+    setattr(cls, REQUIRED_ATTR, [])
     for attribute_key in dir(cls):
         attribute = getattr(cls, attribute_key)
         if getattr(attribute, REQUIRED_ATTR, False):
-            cls._interfaces_required.append(attribute.__name__)
+            getattr(cls, REQUIRED_ATTR).append(attribute.__name__)
     return cls
 
 def implement(*interfaces):
@@ -66,7 +66,10 @@ def final(method):
 
 def _check_required(interface, cls):
     """Checks all required attributes on the new class."""
-    for attribute_key in interface._interfaces_required:
+    if not hasattr(interface, REQUIRED_ATTR):
+        raise InvalidInterface("An interface class must have a "
+            "`%s` list attribute." % REQUIRED_ATTR)
+    for attribute_key in getattr(interface, REQUIRED_ATTR):
         attribute = getattr(interface, attribute_key)
         cls_attribute = getattr(cls, attribute_key, None) or attribute
 
@@ -118,6 +121,10 @@ def _check_final(interface, cls):
                 raise CannotOverrideFinal(
                     "Method %s is final -- cannot override in %s" % (
                         attribute_key, base))
+
+class InvalidInterface(Exception):
+    """Raised when a required interface method is called."""
+    pass
 
 class MissingRequiredAttribute(Exception):
     """Raised when a required interface method is called."""
