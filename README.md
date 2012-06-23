@@ -20,10 +20,10 @@ A simple example:
     @interfaces.define
     class DuckInterface(object):
 
-    @interfaces.require
-    def quack(self):
-        """All Ducks must implement a 'quack' method."""
-        pass
+        @interfaces.require
+        def quack(self):
+            """All Ducks must implement a 'quack' method."""
+            pass
 
     @interfaces.implement(DuckInterface)
     class Tree(object):
