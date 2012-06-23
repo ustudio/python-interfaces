@@ -85,6 +85,18 @@ def _check_final(interface, cls):
 
     lookup_classes = [c for c in cls.mro()]
     lookup_classes.reverse()
+
+    # If an interface is not in the base class list, and the
+    # current class overwrites something labeled as "final" in
+    # the interface, what is the expected behavior?
+    #
+    # Here, we fail if we write over a 'final' method in the
+    # interface, even if it is not one of the base classes.
+    # It complicates a simple case where you define an interface
+    # with a final, implement that interface without subclassing,
+    # and now you cannot call or define that final method...
+    # but that's sort of stupid design anyway.
+
     if interface and interface not in lookup_classes:
         lookup_classes.insert(0, interface)
 
