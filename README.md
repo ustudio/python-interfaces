@@ -36,7 +36,7 @@ class DuckInterface(object):
 at import time:
 
 ```python
-@interfaces.define(object)
+@interfaces.define
 class Silent(object):
     # no quack method
     pass
