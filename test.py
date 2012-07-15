@@ -45,6 +45,13 @@ class FinalInterface(object):
         return "original"
 
 
+@interfaces.define
+class ClassMethodRequired(object):
+
+    @interfaces.require_classmethod
+    def foo(cls):
+        pass
+
 class TestInterfaces(TestCase):
 
     def test_implement(self):
@@ -225,3 +232,17 @@ class TestInterfaces(TestCase):
                 def run(self):
                     pass
 
+    def test_classmethod_required(self):
+        """Test that the classmethod require is intelligent."""
+        with self.assertRaises(interfaces.MissingRequiredClassMethod):
+            @interfaces.implement(ClassMethodRequired)
+            class Foo(object):
+                pass
+
+    def test_classmethod_required_not_instancemethod(self):
+        """Test that the classmethod is required to be a classmethod."""
+        with self.assertRaises(interfaces.MissingRequiredClassMethod):
+            @interfaces.implement(ClassMethodRequired)
+            class Foo(object):
+                def foo(self):
+                    pass

@@ -25,15 +25,19 @@ A simple example:
 import functools
 
 REQUIRED_ATTR = "_interfaces_required"
+REQUIRED_CLASSMETHOD = "_interfaces_required_classmethod"
 FINAL_ATTR = "_interfaces_final"
 
 def define(cls):
     """Class decorator that defines an interface class."""
     setattr(cls, REQUIRED_ATTR, [])
+    setattr(cls, REQUIRED_CLASSMETHOD, [])
     for attribute_key in dir(cls):
         attribute = getattr(cls, attribute_key)
+        if getattr(attribute, REQUIRED_CLASSMETHOD, False):
+            getattr(cls, REQUIRED_CLASSMETHOD).append(attribute_key)
         if getattr(attribute, REQUIRED_ATTR, False):
-            getattr(cls, REQUIRED_ATTR).append(attribute.__name__)
+            getattr(cls, REQUIRED_ATTR).append(attribute_key)
     return cls
 
 def implement(*interfaces):
@@ -53,11 +57,20 @@ def strict(cls):
 def require(method):
     """Method decorator to indicate an interface has a required attribute."""
     doc = method.__doc__
+    exception = MissingRequiredAttribute
+
     @functools.wraps(method)
     def capture_method(instance, *args, **kwargs):
-        raise MissingRequiredAttribute(doc)
+        raise exception(doc)
+
     setattr(capture_method, REQUIRED_ATTR, True)
     return capture_method
+
+def require_classmethod(method):
+    """Ensures a classmethod is required."""
+    method = require(method)
+    setattr(method, REQUIRED_CLASSMETHOD, True)
+    return method
 
 def final(method):
     """Method decorator to indicate a method is final."""
@@ -69,14 +82,23 @@ def _check_required(interface, cls):
     if not hasattr(interface, REQUIRED_ATTR):
         raise InvalidInterface("An interface class must have a "
             "`%s` list attribute." % REQUIRED_ATTR)
+    required_classmethods = getattr(interface, REQUIRED_CLASSMETHOD)
     for attribute_key in getattr(interface, REQUIRED_ATTR):
+        is_classmethod = attribute_key in required_classmethods
         attribute = getattr(interface, attribute_key)
         cls_attribute = getattr(cls, attribute_key, None) or attribute
+        docstring = attribute.__doc__
+
+        if is_classmethod:
+            if attribute != cls_attribute and attribute.im_class == cls:
+                continue
+            else:
+                raise MissingRequiredClassMethod(docstring)
 
         implemented = cls_attribute and \
             not getattr(cls_attribute, REQUIRED_ATTR, False)
+
         if not implemented:
-            docstring = attribute.__doc__
             raise MissingRequiredAttribute(docstring)
 
 def _check_final(interface, cls):
@@ -127,6 +149,10 @@ class InvalidInterface(Exception):
     pass
 
 class MissingRequiredAttribute(Exception):
+    """Raised when a required interface method is called."""
+    pass
+
+class MissingRequiredClassMethod(Exception):
     """Raised when a required interface method is called."""
     pass
 
