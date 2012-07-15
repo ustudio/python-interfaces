@@ -71,7 +71,7 @@ class BaseClass(object):
 # the following will raise an exception at import:
 
 @interfaces.strict
-class SubClass(object):
+class SubClass(BaseClass):
 
     class method(self):
         return "New functionality!"
