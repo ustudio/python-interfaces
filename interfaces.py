@@ -90,7 +90,7 @@ def _check_required(interface, cls):
         docstring = attribute.__doc__
 
         if is_classmethod:
-            if attribute != cls_attribute and attribute.im_class == cls:
+            if attribute != cls_attribute and cls_attribute.im_self == cls:
                 continue
             else:
                 raise MissingRequiredClassMethod(docstring)

@@ -246,3 +246,11 @@ class TestInterfaces(TestCase):
             class Foo(object):
                 def foo(self):
                     pass
+
+    def test_classmethod_required_works(self):
+        """Test that a required classmethod can be implemented."""
+        @interfaces.implement(ClassMethodRequired)
+        class Foo(object):
+            @classmethod
+            def foo(cls):
+                pass
