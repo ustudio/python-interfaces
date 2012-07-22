@@ -28,6 +28,7 @@ REQUIRED_ATTR = "_interfaces_required"
 REQUIRED_CLASSMETHOD = "_interfaces_required_classmethod"
 FINAL_ATTR = "_interfaces_final"
 
+
 def define(cls):
     """Class decorator that defines an interface class."""
     setattr(cls, REQUIRED_ATTR, [])
@@ -40,6 +41,7 @@ def define(cls):
             getattr(cls, REQUIRED_ATTR).append(attribute_key)
     return cls
 
+
 def implement(*interfaces):
     """Class decorator that checks a class for implementation."""
     def wrapper(cls):
@@ -49,10 +51,12 @@ def implement(*interfaces):
         return cls
     return wrapper
 
+
 def strict(cls):
     """Class decorator to run final check, etc. for non-implement classes."""
     _check_final(None, cls)
     return cls
+
 
 def require(method):
     """Method decorator to indicate an interface has a required attribute."""
@@ -66,22 +70,26 @@ def require(method):
     setattr(capture_method, REQUIRED_ATTR, True)
     return capture_method
 
+
 def require_classmethod(method):
     """Ensures a classmethod is required."""
     method = require(method)
     setattr(method, REQUIRED_CLASSMETHOD, True)
     return method
 
+
 def final(method):
     """Method decorator to indicate a method is final."""
     setattr(method, FINAL_ATTR, True)
     return method
 
+
 def _check_required(interface, cls):
     """Checks all required attributes on the new class."""
     if not hasattr(interface, REQUIRED_ATTR):
-        raise InvalidInterface("An interface class must have a "
-            "`%s` list attribute." % REQUIRED_ATTR)
+        raise InvalidInterface(
+            "An interface class must have a `%s` list attribute." %
+            REQUIRED_ATTR)
     required_classmethods = getattr(interface, REQUIRED_CLASSMETHOD)
     for attribute_key in getattr(interface, REQUIRED_ATTR):
         is_classmethod = attribute_key in required_classmethods
@@ -100,6 +108,7 @@ def _check_required(interface, cls):
 
         if not implemented:
             raise MissingRequiredAttribute(docstring)
+
 
 def _check_final(interface, cls):
     """Checks all attributes on the new class to ensure not final."""
@@ -144,17 +153,21 @@ def _check_final(interface, cls):
                     "Method %s is final -- cannot override in %s" % (
                         attribute_key, base))
 
+
 class InvalidInterface(Exception):
     """Raised when a required interface method is called."""
     pass
+
 
 class MissingRequiredAttribute(Exception):
     """Raised when a required interface method is called."""
     pass
 
+
 class MissingRequiredClassMethod(Exception):
     """Raised when a required interface method is called."""
     pass
+
 
 class CannotOverrideFinal(Exception):
     """Raised when an implementation of an interface overrides a final."""

@@ -52,6 +52,7 @@ class ClassMethodRequired(object):
     def foo(cls):
         pass
 
+
 class TestInterfaces(TestCase):
 
     def test_implement(self):
@@ -61,7 +62,6 @@ class TestInterfaces(TestCase):
             @interfaces.implement(StringInterface)
             class Obstinate(object):
                 pass
-
 
         @interfaces.implement(StringInterface)
         class Broifier(object):
