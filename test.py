@@ -58,7 +58,7 @@ class TestInterfaces(TestCase):
     def test_implement(self):
         """Test implementing an interface."""
 
-        with self.assertRaises(interfaces.MissingRequiredAttribute):
+        with self.assertRaises(interfaces.MissingRequiredMethod):
             @interfaces.implement(StringInterface)
             class Obstinate(object):
                 pass
@@ -77,8 +77,8 @@ class TestInterfaces(TestCase):
         class PassThrough(Broifier):
             pass
 
-        with self.assertRaises(interfaces.MissingRequiredAttribute):
-            # should fail, because it's actually not really implemented...
+        with self.assertRaises(interfaces.MissingRequiredMethod):
+            # should fail, because it's not implemented...
             @interfaces.implement(StringInterface)
             class InterfaceSubclass(StringInterface):
                 pass
@@ -103,22 +103,70 @@ class TestInterfaces(TestCase):
             class Foo(object):
                 pass
 
+    def test_interface_signature(self):
+
+        @interfaces.define
+        class SimpleInterface(object):
+            @interfaces.require
+            def execute(self, a):
+                pass
+
+        @interfaces.define
+        class ArgsInterface(object):
+            @interfaces.require
+            def execute(self, *args):
+                pass
+
+        @interfaces.define
+        class KwargsInterface(object):
+            @interfaces.require
+            def execute(self, **kwargs):
+                pass
+
+        with self.assertRaises(interfaces.InvalidMethodSignature):
+            # should fail because the argument count is different.
+            @interfaces.implement(SimpleInterface)
+            class Impl(object):
+                def execute(self):
+                    pass
+
+        with self.assertRaises(interfaces.InvalidMethodSignature):
+            #should fail because the argument names are different
+            @interfaces.implement(SimpleInterface)
+            class Impl(object):
+                def execute(self, b):
+                    pass
+
+        with self.assertRaises(interfaces.InvalidMethodSignature):
+            #should fail because we're missing args
+            @interfaces.implement(ArgsInterface)
+            class Impl(object):
+                def execute(self):
+                    pass
+
+        with self.assertRaises(interfaces.InvalidMethodSignature):
+            #should fail because we're missing kwargs
+            @interfaces.implement(KwargsInterface)
+            class Impl(object):
+                def execute(self):
+                    pass
+
     def test_multiple_interfaces(self):
         """Test that we can use multiple interfaces."""
 
-        with self.assertRaises(interfaces.MissingRequiredAttribute):
+        with self.assertRaises(interfaces.MissingRequiredMethod):
             @interfaces.implement(StringInterface, NumberInterface)
             class UberThing(object):
                 pass
 
-        with self.assertRaises(interfaces.MissingRequiredAttribute):
+        with self.assertRaises(interfaces.MissingRequiredMethod):
             @interfaces.implement(StringInterface, NumberInterface)
             class UberThing(object):
 
                 def execute(self, argument):
                     return argument
 
-        with self.assertRaises(interfaces.MissingRequiredAttribute):
+        with self.assertRaises(interfaces.MissingRequiredMethod):
             @interfaces.implement(StringInterface, NumberInterface)
             class UberThing(object):
 
@@ -147,7 +195,7 @@ class TestInterfaces(TestCase):
                 """Must implement run."""
                 pass
 
-        with self.assertRaises(interfaces.MissingRequiredAttribute):
+        with self.assertRaises(interfaces.MissingRequiredMethod):
             @interfaces.implement(InheritedInterface)
             class UsesInheritedInterface(object):
                 def run(self):

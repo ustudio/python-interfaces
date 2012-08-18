@@ -23,8 +23,10 @@ A simple example:
 """
 
 import functools
+import inspect
 
 REQUIRED_ATTR = "_interfaces_required"
+ORIGINAL_METHOD = "_interfaces_method"
 REQUIRED_CLASSMETHOD = "_interfaces_required_classmethod"
 FINAL_ATTR = "_interfaces_final"
 
@@ -61,13 +63,14 @@ def strict(cls):
 def require(method):
     """Method decorator to indicate an interface has a required attribute."""
     doc = method.__doc__
-    exception = MissingRequiredAttribute
+    exception = MissingRequiredMethod
 
     @functools.wraps(method)
     def capture_method(instance, *args, **kwargs):
         raise exception(doc)
 
     setattr(capture_method, REQUIRED_ATTR, True)
+    setattr(capture_method, ORIGINAL_METHOD, method)
     return capture_method
 
 
@@ -107,7 +110,29 @@ def _check_required(interface, cls):
             not getattr(cls_attribute, REQUIRED_ATTR, False)
 
         if not implemented:
-            raise MissingRequiredAttribute(docstring)
+            raise MissingRequiredMethod(docstring)
+
+        original_method = getattr(attribute, ORIGINAL_METHOD)
+        _check_signature(cls_attribute, original_method)
+
+
+def _check_signature(implemented, original):
+    """Ensures the arguments match between functions / methods."""
+    original_spec = inspect.getargspec(original)
+    implemented_spec = inspect.getargspec(implemented)
+    if original_spec.args != implemented_spec.args:
+        raise InvalidMethodSignature(
+            "Required method arguments for %s are incorrect. "
+            "(%s versus %s)" % (
+                implemented, original_spec.args, implemented_spec.args))
+
+    if original_spec.varargs != implemented_spec.varargs:
+        raise InvalidMethodSignature(
+            "Implemented method %s varied *args behavior." % implemented)
+
+    if original_spec.keywords != implemented_spec.keywords:
+        raise InvalidMethodSignature(
+            "Implemented method %s varied **kwargs behavior." % implemented)
 
 
 def _check_final(interface, cls):
@@ -159,7 +184,12 @@ class InvalidInterface(Exception):
     pass
 
 
-class MissingRequiredAttribute(Exception):
+class InvalidMethodSignature(Exception):
+    """Raised when a required method changes signature."""
+    pass
+
+
+class MissingRequiredMethod(Exception):
     """Raised when a required interface method is called."""
     pass
 

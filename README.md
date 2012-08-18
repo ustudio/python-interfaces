@@ -65,7 +65,7 @@ around any class you want to check:
 class BaseClass(object):
 
     @interfaces.final
-    class method(self):
+    def method(self):
         return "Old functionality!"
 
 # the following will raise an exception at import:
@@ -73,9 +73,28 @@ class BaseClass(object):
 @interfaces.strict
 class SubClass(BaseClass):
 
-    class method(self):
+    def method(self):
         return "New functionality!"
 ```
+
+It will also check to make sure your arguments match in your implemented
+methods. For example:
+
+```python
+@interfaces.define
+class Base(object):
+    @interfaces.require
+    def foo(self, a, b, *args):
+        pass
+
+@interfaces.implements(Base)
+class Sub(object):
+    def foo(self, a):
+        pass
+```
+
+...will raise an `InvalidMethodSignature` error. It checks arguments (and
+argument names) as well as the presence of *args and **kwargs.
 
 Limitations
 -----------
@@ -91,8 +110,5 @@ def get_json(instance):
     return instance.to_json()
 ```
 
-...but that may be too close to type checking, and the only thing you gain
-is a more explicit exception at
-runtime. Feedback welcome.
-
-
+...but that's just plain type checking, and the only thing you gain over isinstance
+is a more explicit exception at runtime. Feedback welcome.
