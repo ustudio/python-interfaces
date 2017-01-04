@@ -87,6 +87,23 @@ def final(method):
     return method
 
 
+def _check_attribute_python2(attribute, cls_attribute, cls):
+    return attribute != cls_attribute and cls_attribute.im_self == cls
+
+
+def _check_attribute_python3(attribute, cls_attribute, cls):
+    ref = cls_attribute.__self__ if hasattr(cls_attribute, "__self__") \
+        else cls_attribute.__module__
+    return attribute != cls_attribute and ref == cls
+
+
+# for Python 2 / Python 3 checking
+if hasattr(final, "__module__"):
+    _check_attribute = _check_attribute_python3
+else:
+    _check_attribute = _check_attribute_python2
+
+
 def _check_required(interface, cls):
     """Checks all required attributes on the new class."""
     if not hasattr(interface, REQUIRED_ATTR):
@@ -101,7 +118,7 @@ def _check_required(interface, cls):
         docstring = attribute.__doc__
 
         if is_classmethod:
-            if attribute != cls_attribute and cls_attribute.im_self == cls:
+            if _check_attribute(attribute, cls_attribute, cls):
                 continue
             else:
                 raise MissingRequiredClassMethod(docstring)

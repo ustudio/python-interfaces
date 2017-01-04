@@ -17,7 +17,7 @@ from distutils.core import setup
 
 setup(
     name='interfaces',
-    version='0.0.3',
+    version='0.0.4',
     description='Simple decorator implementation of an interface.',
     author='Josh Marshall',
     author_email='catchjosh@gmail.com',

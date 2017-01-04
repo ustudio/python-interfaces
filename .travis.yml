@@ -1,0 +1,19 @@
+language: python
+sudo: false
+python:
+- '2.7'
+- '3.4'
+- '3.5'
+install:
+- pip install -r dev-requirements.txt
+script: nosetests test.py
+deploy:
+  provider: pypi
+  user: joshmarshall
+  password:
+    secure: ZyUz1pTT1ttgCflVnKGlcE7zxNicgHQqJEYRRE9YvFymZyZ5p2Bdqj3714859kfZHRXUs7cGzq3x7/W7i22HXTF0PKi88P1HlvZ0HgMN+jhVm0lWNDqRj+dfaBFAq+1meX/tJEs2GhVDV18YTPFY5yDI8xwiy64/gR1BXCetQS++4EYQ/1zJLUQma6dcb+bgt6/7f7rnUsFZfBkqAiiHn1CUDh7bgsnBZokdJAyTQMToGNOwX+6NVgege6yBiXEceiqtg0Ji3xh7jeDrZY2ZZk3SqrzOsVMhhAiIJPHpiIIPoCu9UDOJcctKnqnrByu57H8QbzD+VmA2JoKbSaZ/c8zqdac7X6A273OsF2nWImrH3Ji1agt7GtHnSRmdTgEmd6ulJJnp9+QDL3W416R4RMNVtS/xvh1/T3TW+vYCm0FWnvlWjO40JJgXgSi5Ggi2/ffXa8zDx17ZmYgkB+D7ZLxD0S6jLgd2uC2xMVXi4RDFoHlclUWoZNHCBKpkD0coqaD8F2//QeRRnkmCyIykrNbEvBaCU3UpQdyo7kXiVnvWk0V7sT08VstnbD11RIUPkAZXTrAk9hb8BFXsTT9ISTAulvWnw2VFd5F1/gzjaHzoupBlkubcBwbNmB2KUuXWNqMXa1JgBfIZrP1A2IbHGehgQ6BQoFMnh0bNQO7o0as=
+  on:
+    tags: true
+    branch: master
+    distributions: sdist bdist_wheel
+    repo: joshmarshall/python-interfaces
