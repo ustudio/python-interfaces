@@ -6,7 +6,7 @@ python:
 - '3.5'
 install:
 - pip install -r dev-requirements.txt
-script: nosetests tests.py
+script: nosetests test.py
 deploy:
   provider: pypi
   user: joshmarshall
